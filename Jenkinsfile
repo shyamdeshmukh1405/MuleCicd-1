@@ -1,31 +1,23 @@
-pipeline {
-  agent any
-  stages {
-    stage('Unit Test') { 
-      steps {
-        sh 'mvn clean test'
-      }
-    }
-    stage('Deploy Standalone') { 
-      steps {
-        sh 'mvn deploy -P standalone'
-      }
-    }
-    stage('Deploy ARM') { 
-      environment {
-        ANYPOINT_CREDENTIALS = credentials('anypoint.credentials') 
-      }
-      steps {
-        sh 'mvn deploy -P arm -Darm.target.name=local-3.9.0-ee -Danypoint.username=${ANYPOINT_CREDENTIALS_USR}  -Danypoint.password=${ANYPOINT_CREDENTIALS_PSW}' 
-      }
-    }
-    stage('Deploy CloudHub') { 
-      environment {
-        ANYPOINT_CREDENTIALS = credentials('anypoint.credentials')
-      }
-      steps {
-        sh 'mvn deploy -P cloudhub -Dmule.version=3.9.0 -Danypoint.username=${ANYPOINT_CREDENTIALS_USR} -Danypoint.password=${ANYPOINT_CREDENTIALS_PSW}' 
-      }
-    }
-  }
+pipeline{  
+agent any 
+stages{ 
+stage('Build Application') { 
+steps { 
+bat 'mvn clean install' 
+} 
+} 
+stage('Deploy CloudHubs') { 
+environment { 
+ANYPOINT_CREDENTIALS = credentials(' anypointplatformcredentials ') 
+} 
+steps { 
+echo 'Deploying mule project due to the latest code commit…' 
+echo 'Deploying to the configured environment….' 
+bat 'mvn clean deploy -DmuleDeploy  
+-Dusername=${ANYPOINT_CREDENTIALS_USR} -
+Dpassword=${ANYPOINT_CREDENTIALS_PSW} 
+-DworkerType=Micro -Dworkers=1' 
+}  
+} 
+} 
 }
